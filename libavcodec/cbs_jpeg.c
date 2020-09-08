@@ -196,7 +196,10 @@ static int cbs_jpeg_split_fragment(CodedBitstreamContext *ctx,
 
         if (marker == JPEG_MARKER_SOS) {
             length = AV_RB16(frag->data + start);
-
+            /* merge patch: CVE-2020-12284 */
+            if (length > end - start) {
+                 return AVERROR_INVALIDDATA;
+            }
             data_ref = NULL;
             data     = av_malloc(end - start +
                                  AV_INPUT_BUFFER_PADDING_SIZE);
