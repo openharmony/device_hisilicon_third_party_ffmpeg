@@ -41,6 +41,7 @@ X86ASMFLAGS += $(IFLAGS:%=%/) -I$(<D)/ -Pconfig.asm
 
 HOSTCCFLAGS = $(IFLAGS) $(HOSTCPPFLAGS) $(HOSTCFLAGS)
 LDFLAGS    := $(ALLFFLIBS:%=$(LD_PATH)lib%) $(LDFLAGS)
+LDFLAGS += --target=arm-liteos --sysroot=../../../../../../../../prebuilts/lite/sysroot
 
 define COMPILE
        $(call $(1)DEP,$(1))

@@ -39,6 +39,10 @@ all: all-yes
 
 include $(SRC_PATH)/tools/Makefile
 include $(SRC_PATH)/ffbuild/common.mak
+CFLAGS += --target=arm-liteos --sysroot=../../../../../../../../prebuilts/lite/sysroot
+CFLAGS += -Wno-deprecated-declarations -Wno-incompatible-pointer-types-discards-qualifiers \
+          -Wno-string-plus-int -Wno-absolute-value -Wno-format -Wno-invalid-source-encoding \
+          -Wno-missing-prototypes
 
 FF_EXTRALIBS := $(FFEXTRALIBS)
 FF_DEP_LIBS  := $(DEP_LIBS)
@@ -148,7 +152,8 @@ distclean:: clean
 		version.h libavutil/ffversion.h libavcodec/codec_names.h \
 		libavcodec/bsf_list.c libavformat/protocol_list.c \
 		libavcodec/codec_list.c libavcodec/parser_list.c \
-		libavformat/muxer_list.c libavformat/demuxer_list.c
+		libavformat/muxer_list.c libavformat/demuxer_list.c \
+		libavdevice/indev_list.c libavdevice/outdev_list.c libavfilter/filter_list.c
 ifeq ($(SRC_LINK),src)
 	$(RM) src
 endif
