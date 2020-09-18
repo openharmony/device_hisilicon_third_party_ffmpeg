@@ -6,6 +6,7 @@ COMPILER_DIR=$2
 CFG_SDK_TOOLCHAIN=$COMPILER_DIR/bin/
 
 configure_attr=" --prefix=./install \
+    --disable-autodetect \
     --enable-cross-compile \
     --disable-doc \
     --disable-htmlpages \
@@ -50,6 +51,36 @@ configure_attr=" --prefix=./install \
     --enable-demuxer=wav \
     --disable-gpl \
     --disable-zlib \
+    --disable-w32threads \
+    --disable-os2threads \
+    --disable-alsa \
+    --disable-appkit \
+    --disable-avfoundation \
+    --disable-bzlib \
+    --disable-coreimage \
+    --disable-iconv \
+    --disable-libxcb \
+    --disable-libxcb-shm \
+    --disable-libxcb-xfixes \
+    --disable-libxcb-shape \
+    --disable-lzma \
+    --disable-sndio \
+    --disable-schannel \
+    --disable-sdl2 \
+    --disable-securetransport \
+    --disable-xlib \
+    --disable-amf \
+    --disable-audiotoolbox \
+    --disable-cuda-llvm \
+    --disable-cuvid \
+    --disable-nvdec \
+    --disable-nvenc \
+    --disable-vaapi \
+    --disable-vdpau \
+    --disable-videotoolbox \
+    --disable-ossfuzz \
+    --disable-swscale-alpha \
+    --disable-valgrind-backtrace \
     --disable-linux-perf "
 
 
