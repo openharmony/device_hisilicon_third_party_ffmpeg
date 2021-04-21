@@ -54,6 +54,7 @@ cancel_opt HAVE_LZO1X_999_COMPRESS
 cancel_opt HAVE_GETHRTIME
 cancel_opt HAVE_CABS
 cancel_opt HAVE_CEXP
+cancel_opt HAVE_VALGRIND_VALGRIND_H
 
 make clean
 
