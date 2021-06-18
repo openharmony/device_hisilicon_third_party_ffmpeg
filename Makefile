@@ -8,13 +8,7 @@ RED="\e[31m"
 
 COMPILE_ROOT := $(LOCAL_DIR)
 FFMPEG_VER := ffmpeg-y
-ifeq ($(CFG_CHIP_TYPE), hi3516cv300)
-FF_CONFIG_SH := enable_decoder_config.sh
-#else ifeq ($(CFG_CHIP_TYPE), hi3518ev300)
-#FF_CONFIG_SH := enable_decoder_config.sh
-else
 FF_CONFIG_SH := disable_decoder_config.sh
-endif
 
 export LITEOS_MACRO
 export LITEOS_OSDRV_INCLUDE
@@ -25,14 +19,12 @@ export LITEOSTOPDIR
 
 #override CFLAGS to avoid ffmpeg configure use
 CFLAGS:=
-FF_ADAPT_LITEOS=y
-#export LLVM_COMPILER=y
-ifeq ($(CFG_OS_TYPE), linux)
-export LLVM_COMPILER=n
-CONFIGURE_FILE := configure_gcc
-else
+export FF_ADAPT_LITEOS=y
+ifeq ($(CFG_COMPILE_TYPE), clang)
 export LLVM_COMPILER=y
 CONFIGURE_FILE := configure_llvm
+else
+CONFIGURE_FILE := configure_gcc
 endif
 
 ORG_FFMPEG := $(FFMPEG_VER)
@@ -52,7 +44,8 @@ clean:
 
 $(ORG_FFMPEG):
 	cp $(CONFIGURE_FILE) $(FFMPEG_VER)/configure
-	@if  [ -d $(FFMPEG_VER) ]; then cd $@; chmod 777 ./* -R; ./$(FF_CONFIG_SH) $(CFG_CHIP_TYPE) $(CFG_OS_TYPE) $(CFG_LINUX_COMPILER_VER) $(CFG_OHOS_BUILD_PATH); cd -; fi
+	@if  [ -d $(FFMPEG_VER) ]; then cd $@; chmod 777 ./* -R; ./$(FF_CONFIG_SH) $(CFG_CHIP_TYPE) $(CFG_OS_TYPE) $(CFG_COMPILE_TYPE) $(CFG_LINUX_COMPILER_VER) $(CFG_OHOS_BUILD_PATH); cd -; fi
 	@if  [ $(FF_ADAPT_LITEOS) = 'y' ]; then cd $@; ./adapt_liteos_config.sh; cd -; fi
 	$(MAKE) $(MFLAGS) -j16 -C $(COMPILE_ROOT)/$@
 	$(MAKE) $(MFLAGS) -C $(@) install
+	-@rm $(ORG_FFMPEG)/libavformat/*.o $(ORG_FFMPEG)/libavutil/*.o $(ORG_FFMPEG)/libavcodec/*.o
