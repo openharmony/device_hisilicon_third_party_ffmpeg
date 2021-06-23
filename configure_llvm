@@ -7272,7 +7272,7 @@ CC=$cc
 CXX=$cxx
 AS=$as
 OBJCC=$objcc
-LD=clang
+LD=${LD:=clang}
 DEPCC=$dep_cc
 DEPCCFLAGS=$DEPCCFLAGS \$(CPPFLAGS)
 DEPAS=$as

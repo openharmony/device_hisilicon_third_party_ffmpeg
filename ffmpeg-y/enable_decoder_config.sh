@@ -58,12 +58,12 @@ if [ "${CFG_CHIP_TYPE}" == "hi3518ev300" ]; then
 echo "hi3518ev300 =? ${CFG_CHIP_TYPE}"
 configure_attr+=" --arch=arm --cpu=cortex-a7 "
 echo ${configure_attr} --extra-cflags="-mfloat-abi=softfp -mfpu=neon-vfpv4"
-./configure  ${configure_attr} --extra-cflags="-mfloat-abi=softfp -mfpu=neon-vfpv4 -fPIC -fstack-protector-all -s -ftrapv" --extra-ldflags="-fPIC -Wl,-z,relro,-z,now --shared"
+${CFG_CONFIGURE:=./configure}  ${configure_attr} --extra-cflags="-mfloat-abi=softfp -mfpu=neon-vfpv4 -fPIC -fstack-protector-all -s -ftrapv" --extra-ldflags="-fPIC -Wl,-z,relro,-z,now --shared"
 fi
 
 if [ "${CFG_CHIP_TYPE}" == "hi3516cv300" ]; then
 echo "hi3516cv300 =? ${CFG_CHIP_TYPE}"
 configure_attr+=" --arch=arm --cpu=arm926ej-s --cross-prefix=${CFG_SDK_TOOLCHAIN} "
-./configure  ${configure_attr} --extra-cflags="-nostdlib -nostdinc -fPIC -mlong-calls -fstack-protector-all -s -ftrapv" --extra-ldflags="-fPIC -Wl,-z,relro,-z,now --shared"
+${CFG_CONFIGURE:=./configure}  ${configure_attr} --extra-cflags="-nostdlib -nostdinc -fPIC -mlong-calls -fstack-protector-all -s -ftrapv" --extra-ldflags="-fPIC -Wl,-z,relro,-z,now --shared"
 fi
 
