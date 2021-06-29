@@ -40,8 +40,10 @@ all: all-yes
 include $(SRC_PATH)/tools/Makefile
 include $(SRC_PATH)/ffbuild/common.mak
 ifeq ($(LLVM_COMPILER), y)
-CFLAGS += --target=arm-liteos --sysroot=../../../../../prebuilts/lite/sysroot
-LDFLAGS += --target=arm-liteos --sysroot=../../../../../prebuilts/lite/sysroot
+SYSROOT_PATH ?= ../../../../../prebuilts/lite/sysroot
+ARCH_CFLAGS ?= --target=arm-liteos
+CFLAGS += --sysroot=$(SYSROOT_PATH) $(ARCH_CFLAGS)
+LDFLAGS += --sysroot=$(SYSROOT_PATH) $(ARCH_CFLAGS)
 endif
 FF_EXTRALIBS := $(FFEXTRALIBS)
 FF_DEP_LIBS  := $(DEP_LIBS)

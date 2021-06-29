@@ -1,0 +1,11 @@
+*.so
+*.d
+*.pc
+*.ver
+*.version
+.config
+*_list.c
+install/
+config.*
+libavutil/avconfig.h
+libavutil/ffversion.h

@@ -98,4 +98,4 @@ export http_proxy=""
 export https_proxy=""
 export no_proxy=""
 
-./configure  ${configure_attr} --extra-cflags="-mfloat-abi=softfp -mfpu=neon-vfpv4 -fPIC -fstack-protector-all -s -ftrapv" --extra-ldflags="-Wl,-z,relro,-z,now -fPIC"
+${CFG_CONFIGURE:=./configure}  ${configure_attr} --extra-cflags="-mfloat-abi=softfp -mfpu=neon-vfpv4 -fPIC -fstack-protector-all -s -ftrapv" --extra-ldflags="-Wl,-z,relro,-z,now -fPIC"

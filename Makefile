@@ -1,6 +1,13 @@
 LOCAL_DIR := $(shell pwd)
 MIDDLEWARE_DIR := $(LOCAL_DIR)
-include $(MIDDLEWARE_DIR)/cfg.mak
+
+CFG_CHIP_TYPE=hi3516dv300
+CFG_OS_TYPE=linux
+CFG_COMPILE_TYPE=clang
+CFG_LINUX_COMPILER_VER=himix410
+CFG_OHOS_BUILD_PATH=
+
+-include $(MIDDLEWARE_DIR)/cfg.mak
 
 GREEN="\e[32;1m"
 DONE="\e[39m"
@@ -43,8 +50,7 @@ clean:
 	fi
 
 $(ORG_FFMPEG):
-	cp $(CONFIGURE_FILE) $(FFMPEG_VER)/configure
-	@if  [ -d $(FFMPEG_VER) ]; then cd $@; chmod 777 ./* -R; ./$(FF_CONFIG_SH) $(CFG_CHIP_TYPE) $(CFG_OS_TYPE) $(CFG_COMPILE_TYPE) $(CFG_LINUX_COMPILER_VER) $(CFG_OHOS_BUILD_PATH); cd -; fi
+	@if  [ -d $(FFMPEG_VER) ]; then cd $@; ln -snf ../$(CONFIGURE_FILE) config.sh; CFG_CONFIGURE=./config.sh $(if $(CFG_OHOS_BUILD_PATH),LD=$(CFG_OHOS_BUILD_PATH)/clang,) ./$(FF_CONFIG_SH) $(CFG_CHIP_TYPE) $(CFG_OS_TYPE) $(CFG_COMPILE_TYPE) $(CFG_LINUX_COMPILER_VER) $(CFG_OHOS_BUILD_PATH); cd -; fi
 	@if  [ $(FF_ADAPT_LITEOS) = 'y' ]; then cd $@; ./adapt_liteos_config.sh; cd -; fi
 	$(MAKE) $(MFLAGS) -j16 -C $(COMPILE_ROOT)/$@
 	$(MAKE) $(MFLAGS) -C $(@) install
