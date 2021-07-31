@@ -1,0 +1,12 @@
+[
+    {
+    "Name": "uboot",
+    "License": "LGPL-2.1+",
+    "License File": "LICENSE",
+    "Version Number": "4.2.2",
+    "Owner": "",
+    "Upstream URL": "https://github.com/FFmpeg/FFmpeg/archive/refs/tags/n4.2.2.zip",
+    "Description": "ffmpeg"
+    }
+]
+
