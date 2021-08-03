@@ -111,6 +111,7 @@ static void filter_line_c(void *dst1,
 }
 
 #define MAX_ALIGN 8
+// fix CVE-2020-22021
 static void filter_edges(void *dst1, void *prev1, void *cur1, void *next1,
                          int w, int prefs, int mrefs, int parity, int mode)
 {
@@ -123,20 +124,22 @@ static void filter_edges(void *dst1, void *prev1, void *cur1, void *next1,
     uint8_t *next2 = parity ? cur  : next;
 
     const int edge = MAX_ALIGN - 1;
+    int offset = FFMAX(w - edge, 3);
 
     /* Only edge pixels need to be processed here.  A constant value of false
      * for is_not_edge should let the compiler ignore the whole branch. */
-    FILTER(0, 3, 0)
+    FILTER(0, FFMIN(3, w), 0)
 
-    dst  = (uint8_t*)dst1  + w - edge;
-    prev = (uint8_t*)prev1 + w - edge;
-    cur  = (uint8_t*)cur1  + w - edge;
-    next = (uint8_t*)next1 + w - edge;
+    dst  = (uint8_t*)dst1  + offset;
+    prev = (uint8_t*)prev1 + offset;
+    cur  = (uint8_t*)cur1  + offset;
+    next = (uint8_t*)next1 + offset;
     prev2 = (uint8_t*)(parity ? prev : cur);
     next2 = (uint8_t*)(parity ? cur  : next);
 
-    FILTER(w - edge, w - 3, 1)
-    FILTER(w - 3, w, 0)
+    FILTER(offset, w - 3, 1)
+    offset = FFMAX(offset, w - 3);
+    FILTER(offset, w, 0)
 }
 
 

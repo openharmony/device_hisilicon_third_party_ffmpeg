@@ -187,12 +187,8 @@ static av_cold int v4l2_decode_init(AVCodecContext *avctx)
     capture->av_pix_fmt = avctx->pix_fmt;
 
     ret = ff_v4l2_m2m_codec_init(avctx);
-    if (ret) {
-        V4L2m2mPriv *priv = avctx->priv_data;
+    if (ret) { // fix CVE-2020-22038
         av_log(avctx, AV_LOG_ERROR, "can't configure decoder\n");
-        s->self_ref = NULL;
-        av_buffer_unref(&priv->context_ref);
-
         return ret;
     }
 
@@ -228,8 +224,8 @@ AVCodec ff_ ## NAME ## _v4l2m2m_decoder = { \
     .receive_frame  = v4l2_receive_frame,\
     .close          = ff_v4l2_m2m_codec_end,\
     .bsfs           = bsf_name, \
-    .capabilities   = AV_CODEC_CAP_HARDWARE | AV_CODEC_CAP_DELAY | \
-                      AV_CODEC_CAP_AVOID_PROBING, \
+    .capabilities   = AV_CODEC_CAP_HARDWARE | AV_CODEC_CAP_DELAY | AV_CODEC_CAP_AVOID_PROBING, \
+    .caps_internal  = FF_CODEC_CAP_SETS_PKT_DTS | FF_CODEC_CAP_INIT_CLEANUP, \
     .wrapper_name   = "v4l2m2m", \
 };
 

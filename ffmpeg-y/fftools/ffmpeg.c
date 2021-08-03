@@ -515,6 +515,7 @@ static void ffmpeg_cleanup(int ret)
         }
         av_freep(&fg->inputs);
         for (j = 0; j < fg->nb_outputs; j++) {
+            avfilter_inout_free(&fg->outputs[j]->out_tmp); // fix CVE-2020-22042
             av_freep(&fg->outputs[j]->name);
             av_freep(&fg->outputs[j]->formats);
             av_freep(&fg->outputs[j]->channel_layouts);
@@ -567,6 +568,7 @@ static void ffmpeg_cleanup(int ret)
         ost->audio_channels_mapped = 0;
 
         av_dict_free(&ost->sws_dict);
+        av_dict_free(&ost->swr_opts); // fix CVE-2020-22054
 
         avcodec_free_context(&ost->enc_ctx);
         avcodec_parameters_free(&ost->ref_par);
