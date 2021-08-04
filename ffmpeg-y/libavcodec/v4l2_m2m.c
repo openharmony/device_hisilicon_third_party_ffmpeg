@@ -312,6 +312,7 @@ static void v4l2_m2m_destroy_context(void *opaque, uint8_t *context)
     sem_destroy(&s->refsync);
 
     close(s->fd);
+    av_packet_unref(&s->buf_pkt); // fix CVE-2020-22038
 
     av_free(s);
 }
@@ -321,14 +322,19 @@ int ff_v4l2_m2m_codec_end(AVCodecContext *avctx)
     V4L2m2mPriv *priv = avctx->priv_data;
     V4L2m2mContext* s = priv->context;
     int ret;
+    // fix CVE-2020-22038
+    if (!s)
+        return 0;
 
-    ret = ff_v4l2_context_set_status(&s->output, VIDIOC_STREAMOFF);
-    if (ret)
+    if (s->fd >= 0) {
+        ret = ff_v4l2_context_set_status(&s->output, VIDIOC_STREAMOFF);
+        if (ret)
             av_log(avctx, AV_LOG_ERROR, "VIDIOC_STREAMOFF %s\n", s->output.name);
 
-    ret = ff_v4l2_context_set_status(&s->capture, VIDIOC_STREAMOFF);
-    if (ret)
-        av_log(avctx, AV_LOG_ERROR, "VIDIOC_STREAMOFF %s\n", s->capture.name);
+        ret = ff_v4l2_context_set_status(&s->capture, VIDIOC_STREAMOFF);
+        if (ret)
+            av_log(avctx, AV_LOG_ERROR, "VIDIOC_STREAMOFF %s\n", s->capture.name);
+    }
 
     ff_v4l2_context_release(&s->output);
 
