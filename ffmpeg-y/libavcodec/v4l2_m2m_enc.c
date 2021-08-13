@@ -342,6 +342,7 @@ AVCodec ff_ ## NAME ## _v4l2m2m_encoder = { \
     .receive_packet = v4l2_receive_packet,\
     .close          = ff_v4l2_m2m_codec_end,\
     .capabilities   = AV_CODEC_CAP_HARDWARE | AV_CODEC_CAP_DELAY, \
+    .caps_internal  = FF_CODEC_CAP_INIT_CLEANUP, \
     .wrapper_name   = "v4l2m2m", \
 };
 

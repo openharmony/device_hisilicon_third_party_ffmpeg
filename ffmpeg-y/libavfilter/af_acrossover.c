@@ -314,6 +314,7 @@ static av_cold void uninit(AVFilterContext *ctx)
     int i;
 
     av_freep(&s->splits);
+    av_frame_free(&s->xover); // fix CVE-2020-22056
 
     for (i = 0; i < ctx->nb_outputs; i++)
         av_freep(&ctx->output_pads[i].name);
