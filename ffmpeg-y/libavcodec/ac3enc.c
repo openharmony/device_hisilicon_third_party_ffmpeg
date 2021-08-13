@@ -2050,8 +2050,9 @@ av_cold int ff_ac3_encode_close(AVCodecContext *avctx)
         av_freep(&block->cpl_coord_exp);
         av_freep(&block->cpl_coord_mant);
     }
-
-    s->mdct_end(s);
+    // fix CVE-2020-22046
+    if (s->mdct_end)
+        s->mdct_end(s);
 
     return 0;
 }
@@ -2433,7 +2434,7 @@ av_cold int ff_ac3_encode_init(AVCodecContext *avctx)
 
     ret = validate_options(s);
     if (ret)
-        return ret;
+        goto init_fail; // fix CVE-2020-22046
 
     avctx->frame_size = AC3_BLOCK_SIZE * s->num_blocks;
     avctx->initial_padding = AC3_BLOCK_SIZE;
