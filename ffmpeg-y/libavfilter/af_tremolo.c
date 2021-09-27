@@ -73,7 +73,6 @@ static int filter_frame(AVFilterLink *inlink, AVFrame *in)
         dst += channels;
         src += channels;
         s->index++;
-        // fix CVE-2020-22026
         if (s->index >= s->table_size)
             s->index = 0;
     }
@@ -126,8 +125,8 @@ static int config_input(AVFilterLink *inlink)
     TremoloContext *s = ctx->priv;
     const double offset = 1. - s->depth / 2.;
     int i;
-    // fix CVE-2020-22026
-    s->table_size = lrint(inlink->sample_rate / s->freq + 0.5);
+
+    s->table_size = inlink->sample_rate / s->freq;
     s->table = av_malloc_array(s->table_size, sizeof(*s->table));
     if (!s->table)
         return AVERROR(ENOMEM);

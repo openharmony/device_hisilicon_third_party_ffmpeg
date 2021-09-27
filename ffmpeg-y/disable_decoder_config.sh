@@ -17,9 +17,13 @@ configure_attr=" --prefix=./install \
     --enable-cross-compile \
     --disable-doc \
     --disable-htmlpages \
+    --disable-manpages \
+    --disable-podpages \
+    --disable-txtpages \
     --target-os=linux \
     --enable-shared \
     --disable-static \
+    --disable-swscale-alpha \
     --disable-debug \
     --disable-iconv  \
     --enable-small \
@@ -27,6 +31,7 @@ configure_attr=" --prefix=./install \
     --disable-filters \
     --disable-devices \
     --disable-programs \
+    --disable-ffplay \
     --disable-swresample \
     --disable-swscale \
     --disable-avdevice \
@@ -35,14 +40,18 @@ configure_attr=" --prefix=./install \
     --disable-protocols \
     --disable-pthreads \
     --disable-runtime-cpudetect \
+    --disable-faan
     --disable-everything   \
-    --enable-pic   \
+    --enable-pic \
     --enable-protocol=file \
     --disable-muxers \
     --enable-demuxer=mov\
     --enable-demuxer=mpegts\
+    --enable-demuxer=mp3 \
     --enable-parser=hevc \
     --enable-parser=h264 \
+    --enable-decoder=mp2 \
+    --enable-decoder=mp3 \
     --disable-neon \
     --disable-inline-asm \
     --disable-asm \
@@ -52,6 +61,7 @@ configure_attr=" --prefix=./install \
     --disable-vfp \
     --disable-hardcoded-tables \
     --disable-mediacodec \
+    --disable-mediafoundation \
     --enable-bsf=h264_mp4toannexb \
     --enable-bsf=hevc_mp4toannexb \
     --disable-pixelutils \
@@ -65,8 +75,8 @@ configure_attr=" --prefix=./install \
     --disable-cuda-llvm --disable-cuvid --disable-nvdec --disable-nvenc --disable-vaapi --disable-vdpau \
     --disable-videotoolbox --disable-ossfuzz --disable-swscale-alpha \
     --disable-valgrind-backtrace \
-    --disable-linux-perf "
-
+    --disable-linux-perf \
+    --disable-large-tests "
 
 if [ "${CFG_CHIP_TYPE}" == "hi3559"  -o  "${CFG_CHIP_TYPE}" == "hi3556" ]; then
 echo "hi3559/hi3556 =? ${CFG_CHIP_TYPE}"

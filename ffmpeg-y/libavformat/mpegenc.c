@@ -315,7 +315,7 @@ static av_cold int mpeg_mux_init(AVFormatContext *ctx)
         if (ctx->packet_size < 20 || ctx->packet_size > (1 << 23) + 10) {
             av_log(ctx, AV_LOG_ERROR, "Invalid packet size %d\n",
                    ctx->packet_size);
-            return AVERROR(EINVAL); // fix CVE-2020-22043
+            return AVERROR(EINVAL);
         }
         s->packet_size = ctx->packet_size;
     } else
@@ -343,7 +343,7 @@ static av_cold int mpeg_mux_init(AVFormatContext *ctx)
         st     = ctx->streams[i];
         stream = av_mallocz(sizeof(StreamInfo));
         if (!stream)
-            return AVERROR(ENOMEM); // fix CVE-2020-22043
+            return AVERROR(ENOMEM);
         st->priv_data = stream;
 
         avpriv_set_pts_info(st, 64, 1, 90000);
@@ -377,11 +377,11 @@ static av_cold int mpeg_mux_init(AVFormatContext *ctx)
                     for (sr = 0; sr < 4; sr++)
                          av_log(ctx, AV_LOG_INFO, " %d", lpcm_freq_tab[sr]);
                     av_log(ctx, AV_LOG_INFO, "\n");
-                    return AVERROR(EINVAL); // fix CVE-2020-22043
+                    return AVERROR(EINVAL);
                 }
                 if (st->codecpar->channels > 8) {
                     av_log(ctx, AV_LOG_ERROR, "At most 8 channels allowed for LPCM streams.\n");
-                    return AVERROR(EINVAL); // fix CVE-2020-22043
+                    return AVERROR(EINVAL);
                 }
                 stream->lpcm_header[0] = 0x0c;
                 stream->lpcm_header[1] = (st->codecpar->channels - 1) | (j << 4);
@@ -416,7 +416,7 @@ static av_cold int mpeg_mux_init(AVFormatContext *ctx)
                        st->codecpar->codec_id != AV_CODEC_ID_MP2 &&
                        st->codecpar->codec_id != AV_CODEC_ID_MP3) {
                        av_log(ctx, AV_LOG_ERROR, "Unsupported audio codec. Must be one of mp1, mp2, mp3, 16-bit pcm_dvd, pcm_s16be, ac3 or dts.\n");
-                       return AVERROR(EINVAL); // fix CVE-2020-22043
+                       return AVERROR(EINVAL);
             } else {
                 stream->id = mpa_id++;
             }
@@ -460,7 +460,7 @@ static av_cold int mpeg_mux_init(AVFormatContext *ctx)
         }
         stream->fifo = av_fifo_alloc(16);
         if (!stream->fifo)
-            return AVERROR(ENOMEM); // fix CVE-2020-22043
+            return AVERROR(ENOMEM);
     }
     bitrate       = 0;
     audio_bitrate = 0;
@@ -928,7 +928,7 @@ static int flush_packet(AVFormatContext *ctx, int stream_index,
     for (i = 0; i < zero_trail_bytes; i++)
         avio_w8(ctx->pb, 0x00);
 
-    avio_flush(ctx->pb);
+    avio_write_marker(ctx->pb, AV_NOPTS_VALUE, AVIO_DATA_MARKER_FLUSH_POINT);
 
     s->packet_number++;
 
@@ -957,7 +957,7 @@ static void put_vcd_padding_sector(AVFormatContext *ctx)
 
     s->vcd_padding_bytes_written += s->packet_size;
 
-    avio_flush(ctx->pb);
+    avio_write_marker(ctx->pb, AV_NOPTS_VALUE, AVIO_DATA_MARKER_FLUSH_POINT);
 
     /* increasing the packet number is correct. The SCR of the following packs
      * is calculated from the packet_number and it has to include the padding
@@ -1210,7 +1210,7 @@ static int mpeg_mux_write_packet(AVFormatContext *ctx, AVPacket *pkt)
     if (s->is_dvd) {
         // min VOBU length 0.4 seconds (mpucoder)
         if (is_iframe &&
-            (s->packet_number == 0 ||
+            (s->packet_number == 0 || pts != AV_NOPTS_VALUE &&
              (pts - stream->vobu_start_pts >= 36000))) {
             stream->bytes_to_iframe = av_fifo_size(stream->fifo);
             stream->align_iframe    = 1;
@@ -1244,7 +1244,6 @@ static int mpeg_mux_end(AVFormatContext *ctx)
      * it as it is usually not needed by decoders and because it
      * complicates MPEG stream concatenation. */
     // avio_wb32(ctx->pb, ISO_11172_END_CODE);
-    // avio_flush(ctx->pb);
 
     for (i = 0; i < ctx->nb_streams; i++) {
         stream = ctx->streams[i]->priv_data;
@@ -1254,11 +1253,12 @@ static int mpeg_mux_end(AVFormatContext *ctx)
     return 0;
 }
 
-// fix CVE-2020-22043
 static void mpeg_mux_deinit(AVFormatContext *ctx)
 {
     for (int i = 0; i < ctx->nb_streams; i++) {
         StreamInfo *stream = ctx->streams[i]->priv_data;
+        if (!stream)
+            continue;
         av_fifo_freep(&stream->fifo);
     }
 }

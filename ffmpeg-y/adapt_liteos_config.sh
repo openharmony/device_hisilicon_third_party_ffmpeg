@@ -55,6 +55,7 @@ cancel_opt HAVE_GETHRTIME
 cancel_opt HAVE_CABS
 cancel_opt HAVE_CEXP
 cancel_opt HAVE_VALGRIND_VALGRIND_H
+cancel_opt HAVE_SYMVER_ASM_LABEL
 
 make clean
 

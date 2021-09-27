@@ -85,6 +85,16 @@ static av_cold int decode_init(AVCodecContext *avctx)
         return AVERROR_PATCHWELCOME;
     }
 
+    // the sample rate is only allowed to be 64,128,256 * 44100 by ISO/IEC 14496-3:2005(E)
+    // We are a bit more tolerant here, but this check is needed to bound the size and duration
+    if (avctx->sample_rate > 512 * 44100)
+        return AVERROR_INVALIDDATA;
+
+
+    if (DST_SAMPLES_PER_FRAME(avctx->sample_rate) & 7) {
+        return AVERROR_PATCHWELCOME;
+    }
+
     avctx->sample_fmt = AV_SAMPLE_FMT_FLT;
 
     for (i = 0; i < avctx->channels; i++)
@@ -155,7 +165,7 @@ static int read_table(GetBitContext *gb, Table *t, const int8_t code_pred_coeff[
             for (j = method + 1; j < t->length[i]; j++) {
                 int c, x = 0;
                 for (k = 0; k < method + 1; k++)
-                    x += code_pred_coeff[method][k] * t->coeff[i][j - k - 1];
+                    x += code_pred_coeff[method][k] * (unsigned)t->coeff[i][j - k - 1];
                 c = get_sr_golomb_dst(gb, lsb_size);
                 if (x >= 0)
                     c -= (x + 4) / 8;
@@ -258,7 +268,7 @@ static int decode_frame(AVCodecContext *avctx, void *data,
         skip_bits1(gb);
         if (get_bits(gb, 6))
             return AVERROR_INVALIDDATA;
-        memcpy(frame->data[0], avpkt->data + 1, FFMIN(avpkt->size - 1, frame->nb_samples * avctx->channels));
+        memcpy(frame->data[0], avpkt->data + 1, FFMIN(avpkt->size - 1, frame->nb_samples * channels));
         goto dsd;
     }
 
@@ -283,7 +293,7 @@ static int decode_frame(AVCodecContext *avctx, void *data,
 
     same_map = get_bits1(gb);
 
-    if ((ret = read_map(gb, &s->fsets, map_ch_to_felem, avctx->channels)) < 0)
+    if ((ret = read_map(gb, &s->fsets, map_ch_to_felem, channels)) < 0)
         return ret;
 
     if (same_map) {
@@ -291,13 +301,13 @@ static int decode_frame(AVCodecContext *avctx, void *data,
         memcpy(map_ch_to_pelem, map_ch_to_felem, sizeof(map_ch_to_felem));
     } else {
         avpriv_request_sample(avctx, "Not Same Mapping");
-        if ((ret = read_map(gb, &s->probs, map_ch_to_pelem, avctx->channels)) < 0)
+        if ((ret = read_map(gb, &s->probs, map_ch_to_pelem, channels)) < 0)
             return ret;
     }
 
     /* Half Probability (10.10) */
 
-    for (ch = 0; ch < avctx->channels; ch++)
+    for (ch = 0; ch < channels; ch++)
         half_prob[ch] = get_bits1(gb);
 
     /* Filter Coef Sets (10.12) */
@@ -321,7 +331,7 @@ static int decode_frame(AVCodecContext *avctx, void *data,
     build_filter(s->filter, &s->fsets);
 
     memset(s->status, 0xAA, sizeof(s->status));
-    memset(dsd, 0, frame->nb_samples * 4 * avctx->channels);
+    memset(dsd, 0, frame->nb_samples * 4 * channels);
 
     ac_get(ac, gb, prob_dst_x_bit(s->fsets.coeff[0][0]), &dst_x_bit);
 
@@ -357,10 +367,10 @@ static int decode_frame(AVCodecContext *avctx, void *data,
     }
 
 dsd:
-    for (i = 0; i < avctx->channels; i++) {
+    for (i = 0; i < channels; i++) {
         ff_dsd2pcm_translate(&s->dsdctx[i], frame->nb_samples, 0,
                              frame->data[0] + i * 4,
-                             avctx->channels * 4, pcm + i, avctx->channels);
+                             channels * 4, pcm + i, channels);
     }
 
     *got_frame_ptr = 1;

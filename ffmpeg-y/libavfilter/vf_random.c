@@ -97,8 +97,13 @@ static int request_frame(AVFilterLink *outlink)
 
     ret = ff_request_frame(ctx->inputs[0]);
 
+next:
     if (ret == AVERROR_EOF && !ctx->is_disabled && s->nb_frames > 0) {
         AVFrame *out = s->frames[s->nb_frames - 1];
+        if (!out) {
+            s->nb_frames--;
+            goto next;
+        }
         out->pts = s->pts[s->flush_idx++];
         ret = ff_filter_frame(outlink, out);
         s->frames[s->nb_frames - 1] = NULL;
@@ -108,7 +113,6 @@ static int request_frame(AVFilterLink *outlink)
     return ret;
 }
 
-// fix CVE-2020-22041
 static av_cold void uninit(AVFilterContext *ctx)
 {
     RandomContext *s = ctx->priv;
@@ -141,7 +145,7 @@ AVFilter ff_vf_random = {
     .priv_size   = sizeof(RandomContext),
     .priv_class  = &random_class,
     .init        = init,
-    .uninit      = uninit, // fix CVE-2020-22041
+    .uninit      = uninit,
     .inputs      = random_inputs,
     .outputs     = random_outputs,
 };
