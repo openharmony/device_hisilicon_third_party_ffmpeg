@@ -1794,7 +1794,8 @@ static int decode_frame(AVCodecContext *avctx, void *data,
     // Zero out the start if ymin is not 0
     for (i = 0; i < planes; i++) {
         ptr = picture->data[i];
-        for (y = 0; y < s->ymin; y++) {
+        // fix CVE-2020-35965
+        for (y = 0; y < FFMIN(s->ymin, s->h); y++) {
             memset(ptr, 0, out_line_size);
             ptr += picture->linesize[i];
         }
