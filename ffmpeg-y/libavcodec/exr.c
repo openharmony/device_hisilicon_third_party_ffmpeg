@@ -1794,7 +1794,8 @@ static int decode_frame(AVCodecContext *avctx, void *data,
     // Zero out the start if ymin is not 0
     for (i = 0; i < planes; i++) {
         ptr = picture->data[i];
-        for (y = 0; y < s->ymin; y++) {
+        // fix CVE-2020-35965
+        for (y = 0; y < FFMIN(s->ymin, s->h); y++) {
             memset(ptr, 0, out_line_size);
             ptr += picture->linesize[i];
         }
@@ -1805,11 +1806,13 @@ static int decode_frame(AVCodecContext *avctx, void *data,
     avctx->execute2(avctx, decode_block, s->thread_data, NULL, nb_blocks);
 
     // Zero out the end if ymax+1 is not h
-    for (i = 0; i < planes; i++) {
-        ptr = picture->data[i] + ((s->ymax+1) * picture->linesize[i]);
-        for (y = s->ymax + 1; y < avctx->height; y++) {
-            memset(ptr, 0, out_line_size);
-            ptr += picture->linesize[i];
+    if (ymax < avctx->height) { // fix CVE-2020-35965
+        for (i = 0; i < planes; i++) {
+            ptr = picture->data[i] + ((s->ymax+1) * picture->linesize[i]);
+            for (y = s->ymax + 1; y < avctx->height; y++) {
+                memset(ptr, 0, out_line_size);
+                ptr += picture->linesize[i];
+            }
         }
     }
 
